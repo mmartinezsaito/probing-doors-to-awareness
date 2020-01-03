@@ -1,6 +1,6 @@
 # probing-doors-to-awareness
 Utility code for the research article "Probing doors to awareness: choice set, visibility, and confidence."
-Stimuli generation and display (Matlab) and data analysis (R) code files. 
+Stimuli generation and display (Matlab with Psychtoolbox), plotting and data analysis (Matlab, R) code files. 
 
 ## Index
 - Stimuli generation
