@@ -1,0 +1,223 @@
+# Created by Octave 4.2.2, Fri Nov 09 18:32:48 2018 MSK <mario@SootyTern>
+# name: DT
+# type: struct
+# ndims: 2
+ 1 6
+# length: 2
+# name: formula
+# type: cell
+# rows: 1
+# columns: 6
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 82
+rti1cr ~ qu2 + qu1 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 88
+rti1cr ~ right1 + right2 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 77
+rti2sfs ~ qu2 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 81
+rti2sfs ~ right2 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 90
+rti2cr ~ rti1 + qu2 + qu1 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 95
+rti2cr ~ rti1 + right1 + right2 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2
+
+
+
+
+
+# name: pvals
+# type: cell
+# rows: 1
+# columns: 6
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 7
+ 0.018 0.162 0.8080000000000001 0.392 0.102 0.768 0.194
+
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 7
+ 0.022 0.15 0.67 0.134 0.328 0.17 0.016
+
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 6
+ 0.718 0.764 0.91 0.718 0.79 0.606
+
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 6
+ 0.63 0.96 0.986 0.654 0.882 0.5639999999999999
+
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 8
+ 0.174 0.204 0.17 0.6879999999999999 0.364 0.854 0.022 0.002
+
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 8
+ 0.136 0.132 0.34 0.914 0.276 0.826 0.038 0.001
+
+
+
+
+
+
+
+# name: Q2
+# type: struct
+# ndims: 2
+ 3 2
+# length: 2
+# name: pvals
+# type: cell
+# rows: 3
+# columns: 2
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 4
+ 0.0005 0.159 0.017 0.763
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 6
+ 0.002 0.066 0.299 0.857 0.633 0.116
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 6
+ 0.01 0.001 0.312 0.598 0.722 0.73
+
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 6
+ 0.141 0.641 0.376 0.263 0.019 0.0005
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 6
+ 0.004 0.077 0.654 0.91 0.853 0.828
+
+
+# name: <cell-element>
+# type: matrix
+# rows: 1
+# columns: 6
+ 0.008 0.004 0.296 0.032 0.624 0.592
+
+
+
+
+
+# name: formula
+# type: cell
+# rows: 3
+# columns: 2
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 68
+qu2 ~ 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 79
+qu2 ~ tk2qu1lr + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 73
+qu2 ~ qu1 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2
+
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 73
+qu2 ~ qu1 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 79
+qu2 ~ tk2qu1lr + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 
+
+
+# name: <cell-element>
+# type: string
+# elements: 1
+# length: 73
+qu2 ~ qu1 + 1 + ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2
+
+
+
+
+
+
+

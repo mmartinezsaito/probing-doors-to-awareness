@@ -1,0 +1,26 @@
+if ~exist('G ')
+  if is4 % G4f13: 6 subjects, 2 mj, 8+4+3 levels, 60 trials
+    ss = 1:6
+    % G4: 6 subjects, 2 mj, 3 ftr2, 8+4+3 levels, 30 trials
+    %nrG = 6*2*3*15;   % 540
+    %G = table(repelem(ss, 90)', repmat(repelem([1 3], 45)', 6, 1), ...
+    %    repmat(repelem(1:3, 15)', 6*2, 1), repmat([1:8 1:4 1:3]', 6*2*3, 1), ...
+    %    repmat([ones(8,1); 2*ones(4,1); 3*ones(3,1)], 6*2*3, 1), ...
+    %    'VariableNames', {'sid', 'mjdg', 'ftr2', 'ftr1', 'task'});
+    %Gf2ni = any(G.ftr2==2, 2); % G.ftr2==1to3 
+    nrG = 6*2*15;   % 180
+    G = table(repelem(ss, 30)', repmat(repelem([1 3], 15)', 6, 1), ...
+      repmat([1:8 1:4 1:3]', 6*2, 1), repmat([ones(8,1); 2*ones(4,1); 3*ones(3,1)], 6*2, 1), ...
+      'VariableNames', {'sid', 'mjdg', 'ftr1', 'task'}); 
+  else % G7: 4 subjects, 2 mj, 2 noi,  8+4+3 levels, 30 trials
+    ss = 7:10
+    nrG = 4*2*2*15;   % 240
+    G = table(repelem(ss, 60)', repmat(repelem([1 3], 30)', 4, 1), ...
+      repmat(repelem(1:2, 15)', 4*2, 1), repmat([1:8 1:4 1:3]', 4*2*2, 1), ...
+      repmat([ones(8,1); 2*ones(4,1); 3*ones(3,1)], 4*2*2, 1), ...
+      'VariableNames', {'sid', 'mjdg', 'noi', 'ftr1', 'task'});
+    Gf2ni = any(G.noi==1:2 ,2); %  G.noi==1to2 
+  end
+  G.da = NaN(nrG, 1); G.meta_da = NaN(nrG, 1); G.t1ca = NaN(nrG, 1);
+  G.auc1 = NaN(nrG, 1); G.auc12 = NaN(nrG, 1); G.auc2 = NaN(nrG, 1); G.auc2sid = NaN(nrG, 1);
+end

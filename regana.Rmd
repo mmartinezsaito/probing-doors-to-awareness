@@ -1,0 +1,235 @@
+---
+title: "E3.4_AccessToAwareness"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r reading}
+library(openxlsx)
+library(lme4); citation("lme4")
+library(lmerTest) # p-values calculated based on Satterthwaite's approximations for lmer objects           
+library(MCMCglmm)
+library(multcomp)
+
+## Read data
+cwd <- "/home/mario/MEGA/Neuroscience/Awareness_Perception_Recognition/Metacognition/E3.47-AccessingAwareness/"
+fn <- paste0(cwd, "Ft4f13.csv")
+df <- read.csv(fn, colClasses=c(rep("factor",3),rep("numeric",2),"integer",rep("factor",2),rep("integer",2), "integer", rep("numeric",7), rep("factor",13)))
+D <- df[df$ftr2!=2,]
+D1 <- df[df$task==1,]
+D2 <- df[df$task==2,]
+D3 <- df[df$task==3,]
+
+```
+
+
+
+
+
+```{r plots, echo=FALSE}
+
+# For glmer models, the summary output provides p-values based on asymptotic Wald tests (P); while
+# this is standard practice for generalized linear models, these tests make assumptions both about
+# the shape of the log-likelihood surface and about the accuracy of a chi-squared approximation to
+# differences in log-likelihoods.
+
+e1_sfs <- glmer(qu2/4 ~ ftr1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 + (1 + ps_onset_qu2 + ps_rt2|sid), family = "binomial", weights = rep(4, nrow(D1[D1$mjdg==3,])), data = D1[D1$mjdg==3,], control = glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e7)))
+e1_cr <- glmer(qu2/4 ~ ftr1 + qu1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 + (1 + ps_onset_qu2 + ps_rt2|sid), family = "binomial", weights = rep(4, nrow(D1[D1$mjdg==1,])), data = D1[D1$mjdg==1,], control = glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e7)))
+e2_sfs <- glmer(qu2/4 ~ ftr1 + qu1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 + (1 + ps_onset_qu2 + ps_rt2|sid), family = "binomial", weights = rep(4, nrow(D2[D2$mjdg==3,])), data = D2[D2$mjdg==3,], control = glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e7)))
+e2_cr <- glmer(qu2/4 ~ ftr1 + qu1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 + (1 + ps_onset_qu2 + ps_rt2|sid), family = "binomial", weights = rep(4, nrow(D2[D2$mjdg==1,])), data = D2[D2$mjdg==1,], control = glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e7)))
+e3_sfs <- glmer(qu2/4 ~ ftr1 + qu1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 + (1 + ps_onset_qu2 + ps_rt2|sid), family = "binomial", weights = rep(4, nrow(D3[D3$mjdg==3,])), data = D3[D3$mjdg==3,], control = glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e7)))
+e3_cr <- glmer(qu2/4 ~ ftr1 + qu1 + ps_onset_st + ps_onset_qu1 + ps_onset_qu2 + ps_rt2 + (1 + ps_onset_qu2 + ps_rt2|sid), family = "binomial", weights = rep(4, nrow(D3[D3$mjdg==1,])), data = D3[D3$mjdg==1,], control = glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e7)))
+
+avf <- anova(mf, test = "Chisq")
+summary(e1_sfs)
+
+# better use a mcmcglmm than a beta-bin from the betareg package
+
+
+
+# confidence intervals
+rise <- sqrt(diag(vcov(ri_lme)))
+ri_tab <- cbind(Est = fixef(ri_lme), LL = fixef(ri_lme) - 1.96 * rise, 
+                UL = fixef(ri_lme) + 1.96 * rise) # table of estimates with 95% CI
+
+# RE hessian and gradient checks
+chksng(mf)
+chkgrad(ri_lme)
+max(abs(vcov(ri_lme)))
+
+
+# plain anova
+replications(formula = Risk ~ Frequency*Hemi*Condition*Valence, data = D) # check balance
+avf <- aov(formula = as.numeric(Risk) ~ (Frequency + Condition + Valence + Hemi) + Error(Subject/(Frequency + Condition + Valence)), data = D)
+summary(avf)
+
+# Tukey's HSD
+glhtf <- glht(ri_all, linfct = mcp(Frequency="Tukey", interaction_average = F), alternative="two.sided")
+# see glhtf$linfct
+summary(glhtf, test=adjusted(type="holm"))
+
+
+
+```
+
+
+```{r Convergence warnings troubleshooting}
+
+library(RCurl)
+
+# Rescale and center continuous parameters
+rscl <- function(D) {
+  numcols <- grep("^c\\.",names(D))
+  s <- D
+  Ds[,numcols] <- scale(Ds[, numcols])
+  #m_sc <- update(m, data = Ds)
+}
+
+# Check singularity
+chksng <- function(m) {
+  tt <- lme4::getME(m, "theta") # REs parameter estimates, parameterized as the relative Cholesky factors of each RE term
+  ll <- lme4::getME(m, "lower") # lower bounds on model parameters (REs parameters only)
+  return (min(tt[ll==0]))
+}
+
+# Double-check gradient calculations
+chkgrad1 <- function(m) {
+  # Extract pre-computed information
+  derivs <- m@optinfo$derivs
+  sc_grad <- with(m@optinfo$derivs, solve(Hessian, gradient))
+  # One general problem is that large scaled gradients are often associated with small absolute gradients: 
+  # we might decide that we’re more interested in testing the (parallel) minimum of these two quantities
+  print(max(abs(sc_grad)))
+  print(max(pmin(abs(sc_grad),abs(derivs$gradient))))
+}
+chkgrad2 <- function(m) {
+  # redo the calculations with numDeriv
+  dd <- update(m, devFunOnly=TRUE)
+  pars <- unlist(getME(m, c("theta","fixef")))
+  grad2 <- grad(dd, pars)
+  hess2 <- hessian(dd, pars)
+  sc_grad2 <- solve(hess2, grad2)
+  max(pmin(abs(sc_grad2), abs(grad2)))
+}
+
+# Resume from previous fit
+resumeOpt <- function(m, numit) {
+  ss <- getME(m, c("theta","fixef"))
+  m2 <- update(m, start = ss, control = glmerControl(optCtrl=list(maxfun=numit)))
+  print(m2)
+}
+
+# Try a different optimizer
+# Try bobyqa for both phases – current GLMM default is bobyqa for first phase, Nelder-Mead for second phase. 
+ss <- getME(m, c("theta","fixef"))
+m2 <- update(m, start=ss, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5)))
+
+# Try many different optimizers
+afurl <- "https://raw.githubusercontent.com/lme4/lme4/master/misc/issues/allFit.R"
+eval(parse(text=getURL(afurl)))
+aa <- allFit(m2)
+
+is.OK <- sapply(aa, is, "merMod")  
+aa.OK <- aa[is.OK]
+lapply(aa.OK,function(x) x@optinfo$conv$lme4$messages)
+
+# Diagnose performance across all optimizers
+(lliks <- sort(sapply(aa.OK,logLik)))
+aa.fixef <- t(sapply(aa.OK,fixef))
+aa.fixef.m <- melt(aa.fixef)
+models <- levels(aa.fixef.m$Var1)
+ylabs <- substr(models,1,3)
+aa.fixef.m <- transform(aa.fixef.m,Var1=factor(Var1,levels=names(lliks)))
+(gplot1 <- ggplot(aa.fixef.m,aes(x=value,y=Var1,colour=Var1))+geom_point()+
+     facet_wrap(~Var2,scale="free")+
+         scale_colour_brewer(palette="Dark2")+
+             scale_y_discrete(breaks=models,
+                              labels=ylabs)+
+                                  labs(x="",y=""))
+
+
+```
+
+
+``` {r MCMC GLMM analysis}
+
+# MCMCglmm_CourseNotes
+k <- 2
+I <- diag(k-1)
+J <- matrix(rep(1, (k-1)^2), c(k-1, k-1))
+#B = list(mu=rep(0, nfe), V=diag(nfe)*(1+pi^2/3))     # for binary responses with separation (and without global intercept), see page 55
+#R/G = list(V = 1e-16, nu = -2))                      # uninformative covariance (for continuous response) with one component, see page 25
+#R/G = list(V = 1e-16, nu = -1))                      # uninformative stdev (for continuous response) with one component, see page 25
+#R/G = list(G1 = list(V = diag(nre)*0, nu = nre-3))   # uninformative covariance for nre components, see page 72 
+#R/G = list(G1 = list(V = diag(nre)*0, nu = nre+1))   # uninformative correlations, see page 71 
+
+t1sfs_reg <- c(1, "ftr1", "ps_onset_st", "ps_onset_qu1", "ps_onset_qu2", "ps_rt2")
+t1cr_reg <- c("qu1", t1sfs_reg)
+t2_reg <- c("tk2qu1lr", t1sfs_reg)
+t3_reg <- t1cr_reg 
+pso_reg <- c(1, "ftr1")
+t1crdt1_reg <- c("qu2", t1cr_reg)
+t1crdt1r_reg <- c("right1", "right2", t1sfs_reg)
+t1sfsdt2_reg <- c("qu2", t1sfs_reg)
+t1sfsdt2r_reg <- c("right2", t1sfs_reg)
+t1crdt2_reg <- c("rti1", t1crdt1_reg)
+t1crdt2r_reg <- c("rti1", t1crdt1r_reg)
+t2dt1_reg <- c("tk2qu1lr", t1sfsdt2_reg)
+t2dt1r_reg <- c("qu1", t1sfsdt2r_reg)
+t2dt2_reg <- c("rti1", t2dt1_reg)
+t2dt2r_reg <- c("rti1", t2dt1r_reg)
+t3dt1_reg <- t1crdt1_reg
+t3dt2_reg <- t1crdt2_reg
+
+resvar <- "rti1"
+D = D2[D2$mjdg==1,]    ; D <- D[complete.cases(D),]  
+regs <- t2dt1_reg
+rhs <- paste(regs, collapse=" + ")
+
+nfe <- length(regs)
+nre <- length(regs)
+ns <- length(levels(D$sid)) 
+nrs <- nrow(D) - (ns-1)*nre + nfe 
+
+prior <- list(B = list(V = diag(nfe)*1e+08, mu = rep(0, nfe)),           # fixed effects, page 24
+              G = list(G1 = list(V = diag(nre)*0.02, nu = nre+1)),       # random effects, uninformative correlations, group G1, see page 67 
+              #R = list(V = 1, fix = TRUE))                              # residuals for categorical data, see page 49
+              R = list(V = 1e-16, nu = -2))                               # residuals, uninformative correlations
+
+
+mcf <- MCMCglmm(fixed = as.formula(paste(resvar, rhs, sep=" ~ ")), 
+                random = as.formula(paste0("~ us(", rhs, "):sid")), 
+                rcov = ~units, data = D, 
+                family = "gaussian", prior = prior,
+                nitt = 23000, burnin = 3000, thin = 10, verbose = T)
+
+summary(mcf)
+sHPDinterval(mcf$Sol, prob = 0.95)
+autocorr(mcf$Sol)
+autocorr(mcf$VCV)
+effectiveSize(mcf$Sol) # Sample size adjusted for autocorrelation
+effectiveSize(mcf$VCV) 
+
+plot(mcf)
+predict(mcf, marginal = as.formula(paste0("~ us(", paste(regs, collapse=" + "), "):sid")), type = "response", interval = "confidence")
+
+points(cbind(mcf$Sol, mcf$VCV))
+hist(mcf$Sol)
+#IC <- mcf$VCV[, 1]/(rowSums(mcf$VCV) + pi^2/3)
+# mcf$DIC
+
+```
+
+
+```{r}
+# calculating within-subjects decision times
+library(dplyr)
+Y <- D2 %>% group_by(mjdg, tk2qu1lr, ftr1, sid) %>% summarize(rt1 = mean(rti1, na.rm=T),
+                                                              rt2 = mean(rti2, na.rm=T))
+Y %>% group_by(mjdg, tk2qu1lr, ftr1) %>% summarize(wsrt1 = mean(rt1, na.rm=T),
+                                                   wsrt1sd = sd(rt1, na.rm=T),
+                                                   wsrt2 = mean(rt2, na.rm=T),
+                                                   wsrt2sd = sd(rt2, na.rm=T))
+```
