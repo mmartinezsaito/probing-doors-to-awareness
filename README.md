@@ -1,8 +1,8 @@
-# probing-doors-to-awareness
+## Probing doors to awareness: a study of visual perception, metacognition, and introspective measures
 Utility code for the research article "Probing doors to awareness: choice set, visibility, and confidence."
 Stimuli generation and display (Matlab with Psychtoolbox), plotting and data analysis (Matlab, R) code files. 
 
-## Index
+### Index
 - Stimuli generation
   + /stimuli
     + Calibration utilities
